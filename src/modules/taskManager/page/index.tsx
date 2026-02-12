@@ -6,7 +6,6 @@ import {
 } from "@/modules/taskManager/components/cardProduto";
 import { useEffect, useState } from "react";
 import { DialogCreateProduto } from "@/modules/taskManager/components/dialogCreateProduto";
-import { api } from "../services/api";
 import { DialogEditProduto } from "../components/dialogEditProduto";
 import { Field } from "@/shared/components/ui/field";
 import { Label } from "@/shared/components/ui/label";
@@ -17,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { Search, X } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
+import { api } from "../service/api";
 
 function TaskManager() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -31,7 +31,7 @@ function TaskManager() {
 
   async function getProducts() {
     try {
-      const response = await api.get("api/produtos", {
+      const response = await api.get<CardProdutoProp[]>("api/produtos", {
         params: {
           categoria: categorySelected === "all" ? "" : categorySelected,
           ordenar: orderSelected,
@@ -62,20 +62,25 @@ function TaskManager() {
   }, [categorySelected, orderSelected, search]);
 
   return (
-    <div className="w-full h-screen p-12 space-y-3 ">
+    <div className="w-full h-screen p-4 lg:p-12 space-y-3">
       <header>
-        <div className="flex justify-between items-center">
-          <h1 className="font-bold text-2xl">Catálogo de Produtos</h1>
+        <div className="flex flex-col md:flex-row gap-3 md:justify-between md:gap-0 items-center px-4 md:px-0">
+          <h1 className="font-bold text-2xl text-text-primary">
+            Catálogo de Produtos
+          </h1>
 
-          <Button onClick={() => setOpenDialog(true)}>+ Novo Produto</Button>
+          <Button onClick={() => setOpenDialog(true)} className="w-full">
+            <Plus />
+            Novo Produto
+          </Button>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto space-y-10">
-        <div className="flex gap-3 items-end">
-          <div className="w-full relative">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 space-y-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+          <div className="relative w-full md:flex-1">
             <Input
-              className="w-full"
+              className="w-full pr-10"
               placeholder="Buscar produtos..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -83,8 +88,8 @@ function TaskManager() {
             <Search className="absolute top-1/2 -translate-y-1/2 right-3 h-4 w-4 text-gray-500" />
           </div>
 
-          <Field>
-            <Label htmlFor="username-1">Filtre por Categoria</Label>
+          <Field className="w-full md:w-60">
+            <Label>Filtre por Categoria</Label>
             <Select
               value={categorySelected}
               onValueChange={(e) => setCategorySelected(e)}
@@ -93,8 +98,8 @@ function TaskManager() {
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as Categorias</SelectItem>
-                <SelectItem value="pc">Computador</SelectItem>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="computador">Computador</SelectItem>
                 <SelectItem value="console">Consoles</SelectItem>
                 <SelectItem value="monitor">Monitores</SelectItem>
                 <SelectItem value="celular">Celulares</SelectItem>
@@ -102,17 +107,14 @@ function TaskManager() {
             </Select>
           </Field>
 
-          <Field>
-            <Label htmlFor="username-1">Ordenação por</Label>
+          <Field className="w-full md:w-52">
+            <Label>Ordenação</Label>
             <Select
               value={orderSelected}
               onValueChange={(e) => setOrderSelected(e)}
             >
               <SelectTrigger>
-                <SelectValue
-                  placeholder="Selecione a categoria"
-                  defaultValue="recentes"
-                />
+                <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="recentes">Recentes</SelectItem>
@@ -122,28 +124,32 @@ function TaskManager() {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-12">
-          {products.map((product, index) => (
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+            xl:grid-cols-4
+            gap-6
+          "
+        >
+          {products.map((product) => (
             <CardProduto
-              nome={product.nome}
-              categoria={product.categoria}
-              preco={product.preco}
-              estoque={product.estoque}
-              ativo={product.ativo}
-              dataCadastro={product.dataCadastro}
-              descricao={product.descricao}
-              imagemUrl={product.imagemUrl}
-              id={product.id}
-              key={index}
+              key={product.id}
+              {...product}
               handleExcluir={deleteProduct}
               openEdit={() => setOpenEditDialog(true)}
               selectProduct={() => setProductSelected(product)}
             />
           ))}
+
           {products.length === 0 && (
-            <div className="w-full flex flex-col justify-center">
-              <X className="w-20 h-20 text-red-700" />
-              <span>Nenhum produto encontrado...</span>
+            <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+              <X className="w-16 h-16 text-red-700 mb-2" />
+              <span className="text-gray-600">
+                Nenhum produto encontrado...
+              </span>
             </div>
           )}
         </div>
