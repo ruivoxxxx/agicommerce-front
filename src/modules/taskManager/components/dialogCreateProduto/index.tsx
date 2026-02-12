@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { useState } from "react";
-import { api } from "../../services/api";
+import { api } from "../../service/api";
+import { cn } from "@/shared/lib/utils";
 
 type DiaLogProp = {
   isOpen: boolean;
@@ -40,6 +41,22 @@ export function DialogCreateProduto({
 
   async function handleSubmit() {
     try {
+      if (!nome.trim()) {
+        return;
+      }
+
+      if (!preco || Number(preco) <= 0) {
+        return;
+      }
+
+      if (estoque < 0) {
+        return;
+      }
+
+      if (!categoria) {
+        return;
+      }
+
       await api.post("api/produtos", {
         nome,
         descricao,
@@ -59,52 +76,73 @@ export function DialogCreateProduto({
   return (
     <Dialog open={isOpen} onOpenChange={onCLose}>
       <div>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm rounded-[12px]">
           <DialogHeader>
             <DialogTitle>Criar Produto</DialogTitle>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="name-1">Nome do Produto</Label>
+              <Label htmlFor="name-1" className="text-[14px]">
+                Nome do Produto
+              </Label>
               <Input
                 placeholder="Informe o nome do produto"
                 value={nome}
+                required
+                maxLength={100}
                 onChange={(e) => setNome(e.target.value)}
+                className={cn(!nome && "border-red-500")}
               />
             </Field>
             <Field>
-              <Label htmlFor="name-1">Descrição</Label>
+              <Label htmlFor="name-1" className="text-[14px]">
+                Descrição
+              </Label>
               <Input
                 placeholder="Informe a descrição do produto"
                 value={descricao}
+                maxLength={100}
                 onChange={(e) => setDescricao(e.target.value)}
               />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Preço</Label>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Preço
+              </Label>
               <Input
                 placeholder="Informe o preço do produto"
+                required
                 value={preco}
                 onChange={(e) => setPreco(e.target.value)}
+                className={cn(!preco && "border-red-500")}
               />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Estoque</Label>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Estoque
+              </Label>
               <Input
                 type="number"
                 placeholder="Informe a quantidade no estoque"
+                required
+                minLength={0}
                 value={estoque}
                 onChange={(e) => setEstoque(Number(e.target.value))}
+                className={cn(!estoque && "border-red-500")}
               />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Categoria</Label>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Categoria
+              </Label>
               <Select value={categoria} onValueChange={(e) => setCategoria(e)}>
-                <SelectTrigger className="w-full max-w-48">
+                <SelectTrigger
+                  className={cn("w-full", !categoria && "border-red-500")}
+                >
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pc">Computador</SelectItem>
+                  <SelectItem value="computador">Computador</SelectItem>
                   <SelectItem value="console">Consoles</SelectItem>
                   <SelectItem value="monitor">Monitores</SelectItem>
                   <SelectItem value="celular">Celulares</SelectItem>
@@ -112,7 +150,9 @@ export function DialogCreateProduto({
               </Select>
             </Field>
             <Field>
-              <Label htmlFor="username-1">Selecione a imagem</Label>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Selecione a imagem
+              </Label>
               <Input
                 id="imagem"
                 type="text"
@@ -125,11 +165,11 @@ export function DialogCreateProduto({
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" onClick={onCLose}>
-                Cancel
+                Voltar
               </Button>
             </DialogClose>
             <Button type="submit" onClick={handleSubmit}>
-              Save changes
+              Criar
             </Button>
           </DialogFooter>
         </DialogContent>
