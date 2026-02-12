@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,42 +10,170 @@ import {
 import { Field, FieldGroup } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { useState } from "react";
+import { api } from "../../service/api";
+import { cn } from "@/shared/lib/utils";
 
 type DiaLogProp = {
   isOpen: boolean;
   onCLose: () => void;
+  getProduct: () => void;
 };
 
-export function DialogCreateProduto({ isOpen, onCLose }: DiaLogProp) {
+export function DialogCreateProduto({
+  isOpen,
+  onCLose,
+  getProduct,
+}: DiaLogProp) {
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [preco, setPreco] = useState("");
+  const [estoque, setEstoque] = useState(0);
+  const [categoria, setCategoria] = useState("");
+  const [imagem, setImagem] = useState("");
+
+  async function handleSubmit() {
+    try {
+      if (!nome.trim()) {
+        return;
+      }
+
+      if (!preco || Number(preco) <= 0) {
+        return;
+      }
+
+      if (estoque < 0) {
+        return;
+      }
+
+      if (!categoria) {
+        return;
+      }
+
+      await api.post("api/produtos", {
+        nome,
+        descricao,
+        preco: Number(preco),
+        estoque,
+        categoria,
+        imagemUrl: imagem,
+      });
+
+      onCLose();
+      getProduct();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onCLose}>
-      <form>
-        <DialogContent className="sm:max-w-sm">
+      <div>
+        <DialogContent className="sm:max-w-sm rounded-[12px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription>
+            <DialogTitle>Criar Produto</DialogTitle>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="name-1" className="text-[14px]">
+                Nome do Produto
+              </Label>
+              <Input
+                placeholder="Informe o nome do produto"
+                value={nome}
+                required
+                maxLength={100}
+                onChange={(e) => setNome(e.target.value)}
+                className={cn(!nome && "border-red-500")}
+              />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+              <Label htmlFor="name-1" className="text-[14px]">
+                Descrição
+              </Label>
+              <Input
+                placeholder="Informe a descrição do produto"
+                value={descricao}
+                maxLength={100}
+                onChange={(e) => setDescricao(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Preço
+              </Label>
+              <Input
+                placeholder="Informe o preço do produto"
+                required
+                value={preco}
+                onChange={(e) => setPreco(e.target.value)}
+                className={cn(!preco && "border-red-500")}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Estoque
+              </Label>
+              <Input
+                type="number"
+                placeholder="Informe a quantidade no estoque"
+                required
+                minLength={0}
+                value={estoque}
+                onChange={(e) => setEstoque(Number(e.target.value))}
+                className={cn(!estoque && "border-red-500")}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Categoria
+              </Label>
+              <Select value={categoria} onValueChange={(e) => setCategoria(e)}>
+                <SelectTrigger
+                  className={cn("w-full", !categoria && "border-red-500")}
+                >
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="computador">Computador</SelectItem>
+                  <SelectItem value="console">Consoles</SelectItem>
+                  <SelectItem value="monitor">Monitores</SelectItem>
+                  <SelectItem value="celular">Celulares</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <Label htmlFor="username-1" className="text-[14px]">
+                Selecione a imagem
+              </Label>
+              <Input
+                id="imagem"
+                type="text"
+                placeholder="Informe a URL da imagem"
+                value={imagem}
+                onChange={(e) => setImagem(e.target.value)}
+              />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" onClick={onCLose}>
+                Voltar
+              </Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" onClick={handleSubmit}>
+              Criar
+            </Button>
           </DialogFooter>
         </DialogContent>
-      </form>
+      </div>
     </Dialog>
   );
 }

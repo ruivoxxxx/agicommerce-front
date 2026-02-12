@@ -52,6 +52,11 @@
   --border: #e5e7eb;
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
+  --gray: #6b7280;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
 }
 
 .dark {
