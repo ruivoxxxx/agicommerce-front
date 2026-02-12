@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,42 +10,130 @@ import {
 import { Field, FieldGroup } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { useState } from "react";
+import { api } from "../../services/api";
 
 type DiaLogProp = {
   isOpen: boolean;
   onCLose: () => void;
+  getProduct: () => void;
 };
 
-export function DialogCreateProduto({ isOpen, onCLose }: DiaLogProp) {
+export function DialogCreateProduto({
+  isOpen,
+  onCLose,
+  getProduct,
+}: DiaLogProp) {
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [preco, setPreco] = useState("");
+  const [estoque, setEstoque] = useState(0);
+  const [categoria, setCategoria] = useState("");
+  const [imagem, setImagem] = useState("");
+
+  async function handleSubmit() {
+    try {
+      await api.post("api/produtos", {
+        nome,
+        descricao,
+        preco: Number(preco),
+        estoque,
+        categoria,
+        imagemUrl: imagem,
+      });
+
+      onCLose();
+      getProduct();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onCLose}>
-      <form>
+      <div>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription>
+            <DialogTitle>Criar Produto</DialogTitle>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label htmlFor="name-1">Name</Label>
-              <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+              <Label htmlFor="name-1">Nome do Produto</Label>
+              <Input
+                placeholder="Informe o nome do produto"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
             </Field>
             <Field>
-              <Label htmlFor="username-1">Username</Label>
-              <Input id="username-1" name="username" defaultValue="@peduarte" />
+              <Label htmlFor="name-1">Descrição</Label>
+              <Input
+                placeholder="Informe a descrição do produto"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1">Preço</Label>
+              <Input
+                placeholder="Informe o preço do produto"
+                value={preco}
+                onChange={(e) => setPreco(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1">Estoque</Label>
+              <Input
+                type="number"
+                placeholder="Informe a quantidade no estoque"
+                value={estoque}
+                onChange={(e) => setEstoque(Number(e.target.value))}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="username-1">Categoria</Label>
+              <Select value={categoria} onValueChange={(e) => setCategoria(e)}>
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pc">Computador</SelectItem>
+                  <SelectItem value="console">Consoles</SelectItem>
+                  <SelectItem value="monitor">Monitores</SelectItem>
+                  <SelectItem value="celular">Celulares</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <Label htmlFor="username-1">Selecione a imagem</Label>
+              <Input
+                id="imagem"
+                type="text"
+                placeholder="Informe a URL da imagem"
+                value={imagem}
+                onChange={(e) => setImagem(e.target.value)}
+              />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" onClick={onCLose}>
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" onClick={handleSubmit}>
+              Save changes
+            </Button>
           </DialogFooter>
         </DialogContent>
-      </form>
+      </div>
     </Dialog>
   );
 }
